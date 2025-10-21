@@ -84,10 +84,11 @@ def plot_results(G, flow_dict=None):
     for u, v in G.edges():
         a = G[u][v]['a']
         b = G[u][v]['b']
-        edge_labels[(u, v)] = f'{a}x + {b}'
+        flow = f" Drivers {flow_dict[(u,v)]:.0f}" if flow_dict else ""
+        edge_labels[(u, v)] = f'{a}x + {b}: {flow}'
     
-    nx.draw_networkx_edges(G, pos, edge_color='gray', arrows=True)
-    nx.draw_networkx_edge_labels(G, pos, edge_labels)
+    nx.draw_networkx_edges(G, pos, edge_color='black', arrows=True)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels, font_color='red')
     
     plt.title("Network Flow Graph")
     plt.axis('off')

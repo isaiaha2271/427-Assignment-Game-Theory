@@ -67,18 +67,18 @@ def main():
         travel_eq = helper.compute_travel_eq(graph, paths, n)
         print(f"Social Optima: {social_optima}")
         print(f"Travel Equilibrium: {travel_eq}")
+        
+        # GRAPH PLOTTING SECTION
+        if args.plot:
+            helper.plot_results(graph, travel_eq)
+        else:
+            print("There was no graph to be displayed...")
 
     else:
         print(
             "One of the following was not provided: n, initial, or final. Please run the program according to this structure:"
         )
         print("\tpython ./traffic_analysis.py digraph_file.gml n initial final --plot")
-
-    # GRAPH PLOTTING SECTION
-    if args.plot:
-        helper.plot_results(graph)
-    else:
-        print("There was no graph to be displayed...")
 
 
 # Runs the program
