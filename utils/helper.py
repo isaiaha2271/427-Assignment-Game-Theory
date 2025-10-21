@@ -84,8 +84,7 @@ def plot_results(G, flow_dict=None):
     for u, v in G.edges():
         a = G[u][v]['a']
         b = G[u][v]['b']
-        flow = flow_dict[(u, v)] if flow_dict else 0
-        edge_labels[(u, v)] = f'f={flow:.1f}\na={a}, b={b}'
+        edge_labels[(u, v)] = f'{a}x + {b}'
     
     nx.draw_networkx_edges(G, pos, edge_color='gray', arrows=True)
     nx.draw_networkx_edge_labels(G, pos, edge_labels)
@@ -93,10 +92,6 @@ def plot_results(G, flow_dict=None):
     plt.title("Network Flow Graph")
     plt.axis('off')
     plt.show()
-
-    # Example usage:
-    # flow_dict = compute_travel_eq(G, paths, n)
-    # plot_graph(G, flow_dict)
 
 
 # obtain all possible paths in grpah
