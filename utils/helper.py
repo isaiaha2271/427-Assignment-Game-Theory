@@ -163,7 +163,7 @@ def plot_results(G, flow_dict=None, eq = False):
     for u, v in G.edges():
         a = G[u][v]['a']
         b = G[u][v]['b']
-        flow = f" Drivers {math.floor(flow_dict[(u,v)])}" if flow_dict else ""
+        flow = f" Drivers {flow_dict[(u,v)]:.0f}" if flow_dict else ""
         edge_labels[(u, v)] = f'{a}x + {b}: {flow}'
     
     nx.draw_networkx_edges(G, pos, edge_color='black', arrows=True)
@@ -201,3 +201,44 @@ def path_cost(G, path, flows):
             G, u, v, flows[(u, v)]
         )  # increment total with travel time of the edge given its current number of cars
     return total
+
+
+
+#round flows in given flow_dictionary do get discrete number of drivers for each edge that mathces input of n drivers
+def round_flows_to_integers(flow_dict, n):
+    
+    #Round down all flows
+    floored_flows = {edge: math.floor(flow) for edge, flow in flow_dict.items()}
+
+    #Calculate how many drivers we have left to assign
+    total_flow = sum(floored_flows.values())
+    remaining = n - total_flow  # how many drivers still unassigned
+
+    # If we need to assign more drivers, give them to edges with the largest fractional parts
+    if remaining > 0:
+        fractional_parts = {
+            edge: flow_dict[edge] - math.floor(flow_dict[edge]) for edge in flow_dict
+        }
+        # Sort edges by fractional part (descending)
+        sorted_edges = sorted(fractional_parts.keys(), key=lambda e: fractional_parts[e], reverse=True)
+
+        for i in range(remaining):
+            edge = sorted_edges[i % len(sorted_edges)]
+            floored_flows[edge] += 1
+
+    #If rounding caused too many drivers , remove from edges with smallest nonzero flows
+    elif remaining < 0:
+        nonzero_edges = [e for e, f in floored_flows.items() if f > 0]
+        nonzero_edges = sorted(nonzero_edges, key=lambda e: floored_flows[e])  # smallest first
+
+        for i in range(abs(remaining)):
+            if i < len(nonzero_edges):
+                floored_flows[nonzero_edges[i]] -= 1
+
+    # Guarantee non-negativity
+    for edge in floored_flows:
+        floored_flows[edge] = max(0, floored_flows[edge])
+
+    return floored_flows
+
+

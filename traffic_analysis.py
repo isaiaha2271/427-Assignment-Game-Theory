@@ -57,6 +57,9 @@ def main():
     final = None
     n = None
     all_paths = None
+    rounded_flow_dict_eq = None
+    rounded_flow_dict_optima = None
+    
 
     
     if args.initial is not None and args.final is not None and args.n is not None:
@@ -66,8 +69,13 @@ def main():
         all_paths = helper.all_possible_paths(graph, str(initial),str(final)) # get all possbile paths from start node to end node 
         social_optima = helper.compute_social_optima(graph, all_paths,n)
         travel_eq = helper.compute_travel_eq(graph,all_paths,n)
-        print(f"Social Optima: {social_optima}")
-        print(f"Travel Equilibrium: {travel_eq}")
+
+        rounded_flow_dict_eq = helper.round_flows_to_integers(travel_eq, n)
+        rounded_flow_dict_optima = helper.round_flows_to_integers(social_optima, n)
+
+        
+        print(f"Social Optima: {rounded_flow_dict_optima}")
+        print(f"Travel Equilibrium: {rounded_flow_dict_eq}")
 
 
 
@@ -76,8 +84,8 @@ def main():
 
     # GRAPH PLOTTING SECTION
     if args.plot:
-        helper.plot_results(graph, travel_eq,True)
-        helper.plot_results(graph,social_optima,False)
+        helper.plot_results(graph, rounded_flow_dict_eq,True)
+        helper.plot_results(graph,rounded_flow_dict_optima,False)
         pass
     else:
         print("There was no graph to be displayed...")
