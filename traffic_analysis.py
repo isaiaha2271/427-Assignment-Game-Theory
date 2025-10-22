@@ -76,8 +76,8 @@ def main():
 
     # GRAPH PLOTTING SECTION
     if args.plot:
-        helper.plot_results(graph, travel_eq,True)
-        helper.plot_results(graph,social_optima,False)
+        helper.plot_results(graph, initial, final, travel_eq,True)
+        helper.plot_results(graph, initial, final, social_optima,False)
         pass
     else:
         print("There was no graph to be displayed...")

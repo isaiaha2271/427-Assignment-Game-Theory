@@ -149,13 +149,16 @@ def compute_travel_eq(G,paths, n):
         iter1 += 1
     return flow_dict
 
-
-def plot_results(G, flow_dict=None, eq = False):
-    pos = nx.spring_layout(G)
+def plot_results(G, initial, final, flow_dict=None, eq = False):
+    # Set fixed seed for consistent layout
+    pos = nx.spring_layout(G, seed=43)
     plt.figure(figsize=(12, 8))
     
-    # Draw the graph
-    nx.draw_networkx_nodes(G, pos, node_color='lightblue', node_size=500)
+    # Create node color map
+    node_colors = ['lightgreen' if node == str(initial) else 'pink' if node == str(final) else 'lightblue' for node in G.nodes()]
+    
+    # Draw the graph with colored nodes
+    nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500)
     nx.draw_networkx_labels(G, pos)
     
     social_cost = 0
@@ -163,27 +166,50 @@ def plot_results(G, flow_dict=None, eq = False):
     
     # Draw edges with weights and flows
     edge_labels = {}
+    edges_with_drivers = []
+    edges_without_drivers = []
+    
     for u, v in G.edges():
         a = G[u][v]['a']
         b = G[u][v]['b']
         drivers = int(flow_dict[(u,v)]) if flow_dict else None
         flow = f" Drivers {drivers}" if drivers else ""
+        
+        # Separate edges with and without drivers
+        if drivers and drivers > 0:
+            edges_with_drivers.append((u, v))
+        else:
+            edges_without_drivers.append((u, v))
+            
         # TRAVEL TIME AND SOCIAL COST
-        travel_time = drivers * ((a * drivers) + b)
+        travel_time = drivers * ((a * drivers) + b) if drivers else 0
         travel_time_label = f"Travel Time {travel_time}" 
         social_cost += travel_time
         # POTENTIAL POWER
-        potential_power = np.sum(x for x in range(1, drivers + 1)) if travel_time else 0
+        potential_power = np.sum(x for x in range(1, drivers + 1)) if drivers else 0
         potential_power_label = f"Potential Power {potential_power}"
         total_potential_power += potential_power
         
         # LABEL
         edge_labels[(u, v)] = f'{a}x + {b}: {flow}\n{travel_time_label}\n{potential_power_label}'
     
-    nx.draw_networkx_edges(G, pos, edge_color='black', arrows=True)
+    # Draw edges with different colors and shorter arrows
+    nx.draw_networkx_edges(G, pos, edgelist=edges_without_drivers, edge_color='gray', 
+                            arrows=True, arrowsize=20, node_size=500, arrowstyle='->')
+    nx.draw_networkx_edges(G, pos, edgelist=edges_with_drivers, edge_color='blue', 
+                            arrows=True, arrowsize=20, node_size=500, arrowstyle='->')
     nx.draw_networkx_edge_labels(G, pos, edge_labels, font_color='red')
+
+    plt.text(0.98, 0.02, f'Total Social Cost: {social_cost}\nTotal Potential Power: {total_potential_power}', 
+                horizontalalignment='right', verticalalignment='bottom', 
+                transform=plt.gca().transAxes,
+                bbox=dict(facecolor='white', alpha=0))
     
-    plt.title("Network Flow Graph")
+    if eq:
+        plt.title("Travel Equilibrium Network Flow Graph")
+    else:
+        plt.title("Social Optima Network Flow Graph")
+
     plt.axis('off')
     plt.show()
 
