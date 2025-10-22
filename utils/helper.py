@@ -79,16 +79,35 @@ def plot_results(G, flow_dict=None):
     nx.draw_networkx_nodes(G, pos, node_color='lightblue', node_size=500)
     nx.draw_networkx_labels(G, pos)
     
+    social_cost = 0
+    total_potential_power = 0
+    
     # Draw edges with weights and flows
     edge_labels = {}
     for u, v in G.edges():
         a = G[u][v]['a']
         b = G[u][v]['b']
-        flow = f" Drivers {flow_dict[(u,v)]:.0f}" if flow_dict else ""
-        edge_labels[(u, v)] = f'{a}x + {b}: {flow}'
+        drivers = int(flow_dict[(u,v)]) if flow_dict else None
+        flow = f" Drivers {drivers}" if drivers else ""
+        # TRAVEL TIME AND SOCIAL COST
+        travel_time = drivers * ((a * drivers) + b)
+        travel_time_label = f"Travel Time {travel_time}" 
+        social_cost += travel_time
+        # POTENTIAL POWER
+        potential_power = np.sum(x for x in range(1, drivers + 1)) if travel_time else 0
+        potential_power_label = f"Potential Power {potential_power}"
+        total_potential_power += potential_power
+        
+        # LABEL
+        edge_labels[(u, v)] = f'{a}x + {b}: {flow}\n{travel_time_label}\n{potential_power_label}'
     
     nx.draw_networkx_edges(G, pos, edge_color='black', arrows=True)
     nx.draw_networkx_edge_labels(G, pos, edge_labels, font_color='red')
+    
+    plt.text(0.98, 0.02, f'Total Social Cost: {social_cost}\nTotal Potential Power: {total_potential_power}', 
+             horizontalalignment='right', verticalalignment='bottom', 
+             transform=plt.gca().transAxes,
+             bbox=dict(facecolor='white', alpha=0))
     
     plt.title("Network Flow Graph")
     plt.axis('off')
