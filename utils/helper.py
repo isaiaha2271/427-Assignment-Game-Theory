@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 import itertools
 import matplotlib.pyplot as plt
-
+import math
 
 # intialize flow amount for every set of edges in graph
 def intialize_flows(G):
@@ -64,7 +64,7 @@ def compute_social_optima(G, paths,n):
                 
 
         #shift flow towards shortest path
-        step_size = 0.1
+        step_size = 0.5
         direction_flow = {edge:0 for edge in flow_dict}
         flow_per_path = n*step_size
         for i in range(len(shortest_path)-1):
@@ -76,9 +76,9 @@ def compute_social_optima(G, paths,n):
 
         # Update flows for each edge using weighted average
         for edge in flow_dict:
-            flow_dict[edge] += (1-step_size)*flow_dict[edge]+step_size*direction_flow[edge]
+            flow_dict[edge] = (1-step_size)*flow_dict[edge]+step_size*direction_flow[edge]
         
-        i+=1
+        iter1+=1
     return flow_dict
 
 
@@ -131,7 +131,7 @@ def compute_travel_eq(G,paths, n):
 
 
         #shift flow towards shortest path
-        step_size = 0.1
+        step_size = 0.5
         direction_flow = {edge:0 for edge in flow_dict}
         flow_per_path = n*step_size
 
@@ -144,13 +144,13 @@ def compute_travel_eq(G,paths, n):
 
         # Update flows for each edge using weighted average
         for edge in flow_dict:
-            flow_dict[edge] += (1-step_size)*flow_dict[edge]+step_size*direction_flow[edge]
+            flow_dict[edge] = (1-step_size)*flow_dict[edge]+step_size*direction_flow[edge]
 
         iter1 += 1
     return flow_dict
 
 
-def plot_results(G, flow_dict=None):
+def plot_results(G, flow_dict=None, eq = False):
     pos = nx.spring_layout(G)
     plt.figure(figsize=(12, 8))
     
@@ -163,20 +163,26 @@ def plot_results(G, flow_dict=None):
     for u, v in G.edges():
         a = G[u][v]['a']
         b = G[u][v]['b']
-        flow = f" Drivers {flow_dict[(u,v)]:.0f}" if flow_dict else ""
+        flow = f" Drivers {math.floor(flow_dict[(u,v)])}" if flow_dict else ""
         edge_labels[(u, v)] = f'{a}x + {b}: {flow}'
     
     nx.draw_networkx_edges(G, pos, edge_color='black', arrows=True)
     nx.draw_networkx_edge_labels(G, pos, edge_labels, font_color='red')
+
     
-    plt.title("Network Flow Graph")
+    if eq:
+        plt.title("Travel Equilibrium Network Flow Graph")
+    else:
+        plt.title("Social Optima Network Flow Graph")
+
+
     plt.axis('off')
     plt.show()
 
 
 # obtain all possible paths in grpah
 def all_possible_paths(G, start, end):
-    return list(nx.all_simple_paths(G, str(start), str(end)))
+    return list(nx.all_simple_paths(G, start, end))
 
 
 # calculate travel time for x cars to travel on edge (u,v)

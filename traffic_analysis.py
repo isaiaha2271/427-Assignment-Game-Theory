@@ -19,9 +19,9 @@ def main():
     # Adds additional options and arguments to the parser, accoring to this CL structure:
     #   python ./graph.py ..
     parser.add_argument("input", type=str)
-    parser.add_argument("--n", type=int)
-    parser.add_argument("--initial", type=int)
-    parser.add_argument("--final", type=int)
+    parser.add_argument("n", type=int)
+    parser.add_argument("initial", type=int)
+    parser.add_argument("final", type=int)
     parser.add_argument("--plot", action="store_true")
 
     
@@ -76,7 +76,8 @@ def main():
 
     # GRAPH PLOTTING SECTION
     if args.plot:
-        helper.plot_results(graph)
+        helper.plot_results(graph, travel_eq,True)
+        helper.plot_results(graph,social_optima,False)
         pass
     else:
         print("There was no graph to be displayed...")
